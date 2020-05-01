@@ -28,7 +28,7 @@ HAS_GOLANGCI := $(shell which golangci-lint)
 # REGISTRY is the container registry to push
 # into. The default is to push to the staging
 # registry, not production.
-REGISTRY?=gcr.io/k8s-staging-descheduler
+REGISTRY?=quay.io/povilasv
 
 # IMAGE is the image name of descheduler
 IMAGE:=descheduler:$(VERSION)
@@ -57,7 +57,10 @@ push-container-to-gcloud: image
 	docker tag $(IMAGE) $(IMAGE_GCLOUD)
 	docker push $(IMAGE_GCLOUD)
 
-push: push-container-to-gcloud
+push: image
+	docker login -u $(DOCKER_USER) -p $(DOCKER_PASSWORD) quay.io
+	docker tag $(IMAGE) $(IMAGE_GCLOUD)-$(TRAVIS_OS_NAME)-$(TRAVIS_CPU_ARCH)
+	docker push $(IMAGE_GCLOUD)-$(TRAVIS_OS_NAME)-$(TRAVIS_CPU_ARCH)
 
 clean:
 	rm -rf _output
